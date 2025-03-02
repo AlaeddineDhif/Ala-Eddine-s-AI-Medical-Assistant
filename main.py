@@ -100,7 +100,7 @@ def predict():
 
             # Si aucun symptôme valide n'est trouvé
             if predicted_disease is None:
-                message = "Aucun symptôme valide n'a été saisi. Veuillez entrer des symptômes valides."
+                message = "No valid symptoms have been entered. Please enter valid symptoms."
                 return render_template('index.html', message=message)
 
             # Récupération des détails (description, précautions, médicaments, régime, exercices)
