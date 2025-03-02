@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare AI - Medical Diagnosis System</title>
+
+    <!-- Ajouter la balise favicon -->
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='healh.png')}}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #1995AD;
+            --secondary-color: #A1D6E2;
+            --accent-color: #F78536;
+            --light-bg: #F1F1F2;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-bg);
+        }
+
+ .navbar {
+    background: rgba(255, 255, 255, 0.8); /* Blanc transparent (80% d'opacité) */
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.5rem;
+}
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            font-size: 1.2rem;
+            margin-left: 1.5rem;
+            transition: all 0.3s ease;
+            color: var(--primary-color) !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+            transform: translateY(-2px);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), #117A8B);
+            padding: 100px 0;
+            color: white;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+        }
+
+        .diagnosis-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-top: -50px;
+            position: relative;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #e56b1f;
+            transform: translateY(-2px);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .category-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .list-items {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .list-items li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .list-items li:last-child {
+            border-bottom: none;
+        }
+
+        .alert-primary {
+            background: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .bg-light {
+            background: rgba(161, 214, 226, 0.1) !important;
+        }
+
+        .rounded {
+            border-radius: 10px !important;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 5px;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .suggestions-dropdown.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: #333;
+            font-size: 14px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .suggestion-item.selected {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbarNav">
+    <!-- Navigation -->
+    <nav class="navbar fixed-top navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{{url_for('static', filename='healh.png')}}" alt="Logo" width="40" class="me-2">
+                Ala Eddine's AI Medical Assistant
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#developer">Developer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+  <!-- Hero Section -->
+<section id="home" class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">AI-Powered Health Diagnosis</h1>
+                <p class="lead mb-4">Get instant preliminary health assessment using our advanced AI system</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="diagnosis-card">
+                    <form action="/predict" method="post">
+                        <div class="mb-4">
+                            <label class="form-label text-dark">Enter Symptoms</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="symptoms" id="symptomsInput"
+                                       placeholder="Example: headache, high fever, cough , neck pain..." required>
+                                <button id="startSpeechRecognition" class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                            <div id="suggestions" class="suggestions-dropdown"></div>
+                            <div id="transcription" class="text-muted small mt-2"></div>
+                        </div>
+
+                        {% if message %}
+                        <div class="alert alert-warning text-center mb-3 p-2" role="alert" style="max-width: 100%; word-wrap: break-word;">
+                            {{ message }}
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Analyse Symptoms <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Remarque directive déplacée ici (en dehors de la boîte de diagnostic) -->
+                <p class="text-white small mt-3 text-center">
+                    <i class="fas fa-info-circle me-2"></i> <!-- Icône d'information -->
+                    <strong>Note:</strong> This tool performs best when you describe your symptoms clearly and in detail. For example, instead of "pain," specify "headache" or "chest pain." Also, you can enter multiple symptoms separated by commas.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Results Section -->
+    <section class="py-5">
+        <div class="container">
+            {% if predicted_disease %}
+            <h2 class="text-center mb-5" style="color: var(--primary-color); font-weight: 700;">Diagnostic Complet</h2>
+            {% endif %}
+
+            <div id="loadingSpinner" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2">Analyse des symptômes en cours...</p>
+            </div>
+
+            <div id="resultsContainer">
+                {% if predicted_disease %}
+                <div class="result-card">
+                    <div class="row">
+                        <!-- Predicted Disease -->
+                        <div class="col-md-12 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-diagnosis me-2"></i>
+                                Predicted Condition
+                            </h3>
+                            <div class="alert alert-primary" role="alert">
+                                <h4 class="alert-heading">{{ predicted_disease }}</h4>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-6 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-file-medical me-2"></i>
+                                Description
+                            </h3>
+                            <div class="bg-light p-3 rounded">
+                                <p>{{ dis_des }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Precautions -->
+                        <div class="col-md-6 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Precautions
+                            </h3>
+                            <ul class="list-items">
+                                {% for precaution in my_precautions %}
+                                <li>
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ precaution }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Medications -->
+                        <div class="col-md-6 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-pills me-2"></i>
+                                Recommended Medications
+                            </h3>
+                            <ul class="list-items">
+                                {% if medications %}
+                                    {% for med in medications %}
+                                        <li>
+                                            <i class="fas fa-capsules text-primary me-2"></i>
+                                            {{ med }}
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li>No medications recommended.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <!-- Diet -->
+                        <div class="col-md-6 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-utensils me-2"></i>
+                                Recommended Diet
+                            </h3>
+                            <ul class="list-items">
+                                {% if my_diet %}
+                                    {% for diet in my_diet %}
+                                        <li>
+                                            <i class="fas fa-leaf text-success me-2"></i>
+                                            {{ diet }}
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li>No diet recommended.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <!-- Workouts -->
+                        <div class="col-md-12 mb-4">
+                            <h3 class="category-title">
+                                <i class="fas fa-running me-2"></i>
+                                Recommended Exercises
+                            </h3>
+                            <div class="row">
+                                {% for exercise in workout %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="bg-light p-3 rounded">
+                                        <i class="fas fa-heartbeat text-danger me-2"></i>
+                                        {{ exercise }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5 bg-white">
+        <div class="container">
+            <h2 class="text-center mb-5" style="color: var(--primary-color); font-weight: 700;">About Our System</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Advanced AI Diagnosis</h3>
+                    <p>Our system leverages cutting-edge machine learning algorithms to analyze symptoms and provide accurate preliminary health assessments. By utilizing a vast database of medical knowledge, the AI can identify potential conditions and offer recommendations for further action.</p>
+                </div>
+                <div class="col-md-6">
+                    <h3>Comprehensive Health Analysis</h3>
+                    <p>We provide detailed reports that include predicted conditions, descriptions, recommended medications, dietary advice, and exercise routines. Our goal is to empower users with the information they need to make informed decisions about their health.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Developer Section -->
+<section id="developer" class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5" style="color: var(--primary-color); font-weight: 700;">Developer</h2>
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="text-center">
+                    <!-- Votre photo -->
+                    <img src="{{url_for('static', filename='alaa.png')}}" alt="Developer" class="rounded-circle mb-3" width="150">
+                    <h3>Ala Eddine Dhif</h3>
+                    <p class="text-muted">AI & IoT Developer</p>
+
+                    <!-- Logos LinkedIn, GitHub et Mail (couleur bleu ciel) -->
+                    <div class="social-icons mt-3">
+                        <!-- LinkedIn -->
+                        <a href="https://www.linkedin.com/in/ala-eddine-dhif-2a901b324/" target="_blank" class="text-decoration-none me-3">
+                            <i class="fab fa-linkedin fa-2x" style="color: var(--primary-color);"></i> <!-- Icône LinkedIn -->
+                        </a>
+
+                        <!-- GitHub -->
+                        <a href="https://github.com/AlaeddineDhif" target="_blank" class="text-decoration-none me-3">
+                            <i class="fab fa-github fa-2x" style="color: var(--primary-color);"></i> <!-- Icône GitHub -->
+                        </a>
+
+                        <!-- Mail (icône enveloppe avec un style moderne) -->
+                        <a href="alaaeddinedhif@gmail.com" class="text-decoration-none">
+                            <i class="fas fa-envelope-square fa-2x" style="color: var(--primary-color);"></i> <!-- Icône Mail -->
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+  <!-- Contact Section -->
+<section id="contact" class="contact-section py-5" style="background: linear-gradient(135deg, var(--primary-color), #117A8B); clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);">
+    <div class="container">
+        <h2 class="text-center mb-5 text-white" style="font-weight: 700;">Contact Us</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="contact-form bg-white p-4 rounded shadow">
+                    <form class="contact-form">
+                        <!-- Champ Nom avec icône -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i> <!-- Icône pour le nom -->
+                                </span>
+                                <input type="text" class="form-control" placeholder="Your Name" required>
+                            </div>
+                        </div>
+
+                        <!-- Champ E-mail avec icône -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i> <!-- Icône pour l'e-mail -->
+                                </span>
+                                <input type="email" class="form-control" placeholder="Email Address" required>
+                            </div>
+                        </div>
+
+                        <!-- Champ Message avec icône -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-comment"></i> <!-- Icône pour le message -->
+                                </span>
+                                <textarea class="form-control" rows="4" placeholder="Message" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Bouton Envoyer -->
+                        <button class="btn btn-primary w-100" style="background: var(--accent-color); border: none;">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const resultsContainer = document.getElementById("resultsContainer");
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Empêcher la soumission immédiate
+
+                // Masquer les résultats et afficher le spinner
+                if (resultsContainer) resultsContainer.style.display = "none";
+                loadingSpinner.style.display = "block";
+
+                // Simuler une analyse de quelques secondes
+                setTimeout(() => {
+                    // Masquer le spinner et afficher les résultats
+                    loadingSpinner.style.display = "none";
+                    if (resultsContainer) resultsContainer.style.display = "block";
+
+                    // Soumettre le formulaire
+                    form.submit();
+                }, 3000); // 3 secondes de simulation
+            });
+
+            // Autocomplétion des symptômes
+            const allSymptoms = {{ all_symptoms|tojson }};
+            const input = document.getElementById('symptomsInput');
+            const suggestionsDiv = document.getElementById('suggestions');
+            let selectedSuggestionIndex = -1;
+
+            input.addEventListener('input', function(e) {
+                const currentValue = e.target.value;
+                const lastSymptom = currentValue.split(',').pop().trim().toLowerCase();
+
+                suggestionsDiv.innerHTML = '';
+
+                if (lastSymptom.length > 0) {
+                    const matches = allSymptoms.filter(symptom =>
+                        symptom.toLowerCase().startsWith(lastSymptom)
+                    );
+
+                    matches.forEach((symptom, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = symptom;
+                        div.onclick = () => selectSuggestion(symptom);
+                        if (index === selectedSuggestionIndex) {
+                            div.classList.add('selected');
+                        }
+                        suggestionsDiv.appendChild(div);
+                    });
+
+                    // Afficher le dropdown avec une animation
+                    suggestionsDiv.classList.add('visible');
+                } else {
+                    suggestionsDiv.classList.remove('visible');
+                }
+            });
+
+            // Sélection des suggestions avec les flèches du clavier
+            input.addEventListener('keydown', function(e) {
+                const suggestions = suggestionsDiv.querySelectorAll('.suggestion-item');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
+                    updateSelectedSuggestion(suggestions);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                    updateSelectedSuggestion(suggestions);
+                } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    selectSuggestion(suggestions[selectedSuggestionIndex].textContent);
+                } else if (e.key === 'Escape') {
+                    suggestionsDiv.classList.remove('visible');
+                }
+            });
+
+            function updateSelectedSuggestion(suggestions) {
+                suggestions.forEach((suggestion, index) => {
+                    if (index === selectedSuggestionIndex) {
+                        suggestion.classList.add('selected');
+                    } else {
+                        suggestion.classList.remove('selected');
+                    }
+                });
+            }
+
+            function selectSuggestion(symptom) {
+                const parts = input.value.split(',').slice(0, -1);
+                parts.push(symptom);
+                input.value = parts.join(', '); // Pas de virgule supplémentaire
+                suggestionsDiv.classList.remove('visible');
+                input.focus();
+                selectedSuggestionIndex = -1; // Réinitialiser la sélection
+            }
+
+            // Cacher les suggestions quand on clique ailleurs
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.classList.remove('visible');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
